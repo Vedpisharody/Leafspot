@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teachable Machine</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+<body>
+  <h1>Teachable Machine Model</h1>
+  <div>
+    <p>Upload an image and let the model predict!</p>
+    <input type="file" id="upload" accept="image/*">
+    <div id="result"></div>
+  </div>
+
+  <script>
+    let model;
+    async function loadModel() {
+      model = await tf.loadGraphModel('https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME/main/model.json');
+    }
+
+    document.getElementById('upload').addEventListener('change', async function(event) {
+      const file = event.target.files[0];
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+
+      img.onload = async function() {
+        const tensor = tf.browser.fromPixels(img).expandDims(0).toFloat();
+        const prediction = await model.predict(tensor);
+        document.getElementById('result').innerText = `Prediction: ${prediction}`;
+      }
+    });
+
+    loadModel();
+  </script>
+</body>
+</html>
