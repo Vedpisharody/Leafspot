@@ -27,7 +27,7 @@
     // Load the pre-trained model from a URL (you should replace this with the correct path to your model)
     async function loadModel() {
       try {
-        model = await tf.loadGraphModel('https://teachablemachine.withgoogle.com/models/EP2EYyS9q/');
+        model = await tf.loadLayersModel('https://teachablemachine.withgoogle.com/models/EP2EYyS9q/');
         console.log('Model Loaded');
       } catch (error) {
         console.error('Error loading model', error);
