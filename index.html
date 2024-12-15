@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Disease Detection</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+<body>
+  <h1>Plant Disease Detection</h1>
+  <p>Upload an image of a plant to detect its disease:</p>
+
+  <input type="file" id="imageUpload" accept="image/*" />
+  <br>
+  <img id="uploadedImage" src="" alt="Plant Image" width="300" />
+  <br>
+  <button onclick="predictDisease()">Predict Disease</button>
+
+  <div id="predictionResult">
+    <h3>Prediction:</h3>
+    <p id="resultText"></p>
+  </div>
+
+  <script>
+    let model;
+
+    // Load the pre-trained model from a URL (you should replace this with the correct path to your model)
+    async function loadModel() {
+      try {
+        model = await tf.loadGraphModel('https://teachablemachine.withgoogle.com/models/EP2EYyS9q/');
+        console.log('Model Loaded');
+      } catch (error) {
+        console.error('Error loading model', error);
+        alert('Error loading model. Please try again later.');
+      }
+    }
+
+    // Call this function to predict the disease when the user clicks the button
+    async function predictDisease() {
+      const image = document.getElementById('uploadedImage');
+      if (!image.src) {
+        alert('Please upload an image first!');
+        return;
+      }
+
+      const tensor = tf.browser.fromPixels(image)
+        .resizeNearestNeighbor([224, 224])  // Resize to match the model input size (224x224 in this case)
+        .toFloat()
+        .expandDims(0);  // Add a batch dimension
+
+      const predictions = await model.predict(tensor).data();
+      const predictedClass = predictions.indexOf(Math.max(...predictions));
+
+      const resultText = document.getElementById('resultText');
+
+      // Map the predicted class index to actual disease names
+      const diseases = ["Disease A", "Disease B", "Disease C"];  // Replace with actual disease names
+      resultText.innerText = `Disease detected: ${diseases[predictedClass]}`;
+    }
+
+    // Load model when the page loads
+    window.onload = loadModel;
+
+    // Handle image upload
+    document.getElementById('imageUpload').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const image = document.getElementById('uploadedImage');
+          image.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>
